@@ -1,0 +1,20 @@
+---
+description: E2E test reliability — auto-wait, isolation, determinism
+globs: cypress/**,playwright/**
+alwaysApply: false
+---
+
+# Test Reliability
+
+## Waits & Assertions
+
+- No hard waits — never use `page.waitForTimeout()` or `cy.wait(<number>)`; rely on auto-waiting
+- Prefer web-first, auto-retrying assertions (e.g. `expect(locator).toBeVisible()`) over manual reads
+
+## Isolation
+
+- Each test must be fully isolated and order-independent; it sets up and tears down its own state/data
+
+## Determinism
+
+- Tests must be deterministic — no branching on application state

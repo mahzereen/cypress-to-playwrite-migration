@@ -1,0 +1,30 @@
+---
+description: Repo-wide engineering standards — SOLID, size limits, documentation, errors, review lens
+globs: "**/*"
+alwaysApply: true
+---
+
+# General Standards
+
+## Design
+
+- Follow SOLID principles
+- File < 300 lines; class < 200 lines; method < 40 lines
+
+## Documentation
+
+- Document public classes and non-trivial methods only; skip self-evident ones
+- When documented, include: **Purpose**, **Params**, **Returns**, **Exceptions**, **Side effects**
+
+## Comments
+
+- Minimal inline comments — only complex logic, workarounds, or TODOs with ticket references
+
+## Implementation
+
+- Prefer built-in framework/language methods over custom helpers
+- No swallowed exceptions; use structured error messages
+
+## Review Lens
+
+Evaluate changes for: readability, maintainability, testability, performance, security, standards adherence

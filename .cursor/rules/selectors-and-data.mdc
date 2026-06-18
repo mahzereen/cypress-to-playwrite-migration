@@ -1,0 +1,22 @@
+---
+description: Selector hierarchy and test data — Conduit-safe locators, fixtures, env-driven config
+globs: cypress/**,playwright/**
+alwaysApply: false
+---
+
+# Selectors & Data
+
+## Selectors
+
+- Prefer `data-testid` when the app exposes stable test IDs
+- When testing Conduit (an app we don't control), use role/accessible-name locators (`getByRole`)
+- Avoid CSS unless stable; never use XPath
+- Selectors live in page objects — not in spec files
+
+## Test Data
+
+- Test data via fixtures + factories; no hardcoded data
+
+## Secrets & Config
+
+- No hardcoded secrets, base URLs, or tokens — read from env/config only
