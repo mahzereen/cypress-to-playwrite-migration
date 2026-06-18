@@ -8,5 +8,8 @@
     "test:ui": "playwright test --ui",
     "test:allure": "echo 'TODO: run tests with Allure reporter and generate report'"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "allure-playwright": "^3.4.1"
+  }
 }

@@ -1,0 +1,22 @@
+FROM node:20-alpine
+
+RUN apk add --no-cache netcat-openbsd
+
+WORKDIR /app
+
+COPY app-under-test/package.json app-under-test/package-lock.json ./
+COPY app-under-test/backend/package.json ./backend/
+COPY app-under-test/frontend/package.json ./frontend/
+
+RUN npm ci --ignore-scripts
+
+COPY app-under-test/backend ./backend
+COPY app-under-test/frontend ./frontend
+COPY app-under-test/vitest.config.js ./
+
+COPY infra/docker/backend-entrypoint.sh /usr/local/bin/backend-entrypoint.sh
+RUN chmod +x /usr/local/bin/backend-entrypoint.sh
+
+EXPOSE 3001
+
+ENTRYPOINT ["backend-entrypoint.sh"]

@@ -1,3 +1,9 @@
+# Local toolchain (optional bootstrap)
+.tools/
+
+# App under test (cloned locally — never committed)
+app-under-test/
+
 # Dependencies
 node_modules/
 

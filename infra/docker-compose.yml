@@ -1,0 +1,63 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: conduit-postgres
+    environment:
+      POSTGRES_USER: conduit
+      POSTGRES_PASSWORD: conduit
+      POSTGRES_DB: conduit_dev
+    ports:
+      - '5432:5432'
+    volumes:
+      - conduit-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U conduit -d conduit_dev']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
+
+  backend:
+    build:
+      context: ..
+      dockerfile: infra/docker/Dockerfile.backend
+    container_name: conduit-backend
+    environment:
+      DEV_DB_USERNAME: conduit
+      DEV_DB_PASSWORD: conduit
+      DEV_DB_NAME: conduit_dev
+      DEV_DB_HOSTNAME: postgres
+      JWT_KEY: local-dev-jwt-key-change-me
+    ports:
+      - '3001:3001'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://localhost:3001/api/tags').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: infra/docker/Dockerfile.frontend
+    container_name: conduit-frontend
+    environment:
+      BACKEND_URL: http://backend:3001
+    ports:
+      - '3000:3000'
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  conduit-postgres-data:
