@@ -1,0 +1,70 @@
+name: Publish Allure
+
+on:
+  workflow_run:
+    workflows: [Cypress CI, Playwright CI, Migration Metrics]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      artifact_name:
+        description: 'Artifact name to publish (or "combined-allure-results")'
+        required: false
+        default: 'combined-allure-results'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: publish-allure
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Generate & Deploy Allure Report
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion != 'cancelled' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download Allure results
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ github.event.inputs.artifact_name || 'combined-allure-results' }}
+          path: allure-results/
+        continue-on-error: true
+
+      - name: Setup Java (Allure requirement)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Allure CLI
+        run: |
+          echo "TODO: npm install -g allure-commandline OR download Allure release"
+          echo "TODO: verify allure --version"
+
+      - name: Generate Allure report
+        run: |
+          echo "TODO: allure generate allure-results -o allure-report --clean"
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: allure-report/
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Report dashboard URL
+        run: |
+          echo "Allure dashboard: ${{ steps.deployment.outputs.page_url }}"
+          echo "TODO: persist URL in README badge / migration docs"

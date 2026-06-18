@@ -1,0 +1,31 @@
+---
+description: Migration monorepo-wide conventions and documentation standards
+globs: "**/*"
+alwaysApply: true
+---
+
+# Migration Monorepo Conventions
+
+## Principles
+
+- Cypress is the **baseline**; Playwright is the **target**
+- No real test logic in scaffold phase — placeholders and TODOs only until implementation PRs
+- All decisions documented as ADRs in `migration/adr/`
+- Empirical data (flakiness, duration, cost) drives decommission timing — not opinion
+
+## Secrets & Artifacts
+
+- Never commit `.env`, JWTs, or `storageState` files
+- Never commit `playwright-report/`, `test-results/`, `cypress/screenshots/`, `cypress/videos/`, or Allure output
+- CI credentials via GitHub Secrets only
+
+## Documentation
+
+- Analysis docs use structured sections and tables
+- Architecture docs use Mermaid in markdown — no PNG diagrams
+- ADRs follow Context / Decision / Consequences template
+
+## Environment
+
+- All tests run against locally hosted Conduit (ADR-005)
+- No dependency on public demo endpoints

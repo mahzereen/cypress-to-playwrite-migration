@@ -1,0 +1,40 @@
+---
+description: Playwright test framework coding standards for Conduit migration target
+globs: playwright/**/*
+alwaysApply: false
+---
+
+# Playwright Standards
+
+> Placeholder — expand with team conventions before implementing tests.
+
+## Structure
+
+- Page objects in `playwright/pages/` (TypeScript) — specs never contain raw selectors
+- Auth setup in `auth.setup.ts` as a dedicated setup project
+- Reusable auth fixture in `playwright/fixtures/auth.fixture.ts`
+- API helpers in `playwright/utils/apiClient.ts`
+- Generated auth state in `.auth/` — gitignored
+
+## Auth
+
+- Setup project authenticates once via API login
+- Persist `storageState` to `.auth/user.json`
+- Browser projects declare `dependencies: ['setup']`
+- Use `auth.fixture.ts` for per-test authenticated page when needed
+
+## Selectors
+
+- Follow ADR-003: `getByRole` → `getByLabel` → `getByPlaceholder` → `getByText`
+- Selectors live in page objects only
+
+## Reporting
+
+- Allure via `allure-playwright` reporter in `playwright.config.ts`
+- Results output to `playwright/reports/allure-results/`
+
+## TODO
+
+- [ ] Define naming conventions for specs (`*.spec.ts`)
+- [ ] Define fixture extension patterns
+- [ ] Define parallel worker and retry defaults

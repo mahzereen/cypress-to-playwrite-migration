@@ -1,0 +1,109 @@
+name: Migration Metrics
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cypress/**'
+      - 'playwright/**'
+      - 'migration/**'
+      - '.github/workflows/migration-metrics.yml'
+  schedule:
+    - cron: '0 8 * * *' # Daily 08:00 UTC — after both test workflows
+  workflow_dispatch:
+
+concurrency:
+  group: migration-metrics
+  cancel-in-progress: false
+
+env:
+  CONDUIT_BASE_URL: http://localhost:3000
+  CONDUIT_API_URL: http://localhost:3000/api
+
+jobs:
+  collect-metrics:
+    name: Aggregate Migration Metrics
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # TODO: Replace with pinned Conduit Docker image / compose
+      - name: Start Conduit locally
+        run: |
+          echo "TODO: docker compose up -d conduit"
+          echo "TODO: wait for Conduit health check"
+
+      - name: Seed Conduit test data
+        run: |
+          echo "TODO: run seed script"
+
+      - name: Health check — Conduit API
+        run: |
+          echo "TODO: curl -f ${CONDUIT_API_URL}/tags"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run Cypress suite (metrics pass)
+        working-directory: cypress
+        env:
+          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+        run: |
+          echo "TODO: npm ci && npm test — capture duration and pass/fail counts"
+
+      - name: Run Playwright suite (metrics pass)
+        working-directory: playwright
+        env:
+          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+        run: |
+          echo "TODO: npm ci && npx playwright install --with-deps && npm test"
+
+      - name: Generate comparison metrics
+        run: |
+          echo "TODO: compare Cypress vs Playwright results"
+          mkdir -p migration/metrics
+          cat > migration/metrics/metrics.json <<'EOF'
+          {
+            "timestamp": "TODO",
+            "cypress": {
+              "duration_ms": null,
+              "total": null,
+              "passed": null,
+              "failed": null,
+              "flaky": null
+            },
+            "playwright": {
+              "duration_ms": null,
+              "total": null,
+              "passed": null,
+              "failed": null,
+              "flaky": null
+            }
+          }
+          EOF
+
+      - name: Upload metrics artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration-metrics
+          path: migration/metrics/metrics.json
+          retention-days: 90
+
+      - name: Upload combined Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: combined-allure-results
+          path: |
+            cypress/reports/allure-results/
+            playwright/reports/allure-results/
+          retention-days: 30
+
+      # TODO: Optionally commit metrics back to flakiness-reliability-report.md via bot

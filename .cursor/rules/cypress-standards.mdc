@@ -1,0 +1,38 @@
+---
+description: Cypress test framework coding standards for Conduit migration baseline
+globs: cypress/**/*
+alwaysApply: false
+---
+
+# Cypress Standards
+
+> Placeholder — expand with team conventions before implementing tests.
+
+## Structure
+
+- Page objects in `cypress/pages/` — specs never contain raw selectors
+- API helpers in `cypress/utils/apiClient.js`
+- Auth via `cypress/utils/auth.js` using `cy.session()` + API login
+- Fixtures in `cypress/fixtures/` — no live credentials or JWTs
+
+## Auth
+
+- Prefer API login inside `cy.session()` for speed
+- Use `validate` callback to detect expired sessions
+- Never commit session cache or tokens
+
+## Selectors
+
+- Follow ADR-003 hierarchy: role → label → placeholder → text
+- Selectors live in page objects only
+
+## Reporting
+
+- Allure metadata via `cypress/utils/allure.js`
+- Results output to `cypress/reports/allure-results/`
+
+## TODO
+
+- [ ] Define naming conventions for specs (`*.cy.js`)
+- [ ] Define custom command patterns
+- [ ] Define retry and timeout defaults

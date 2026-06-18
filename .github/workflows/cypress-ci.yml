@@ -1,0 +1,100 @@
+name: Cypress CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cypress/**'
+      - '.github/workflows/cypress-ci.yml'
+  pull_request:
+    paths:
+      - 'cypress/**'
+      - '.github/workflows/cypress-ci.yml'
+  schedule:
+    - cron: '0 6 * * *' # Daily 06:00 UTC — flakiness baseline
+  workflow_dispatch:
+
+concurrency:
+  group: cypress-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CONDUIT_BASE_URL: http://localhost:3000
+  CONDUIT_API_URL: http://localhost:3000/api
+
+jobs:
+  cypress:
+    name: Cypress E2E — Conduit
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # TODO: Replace with pinned Conduit Docker image / compose
+      - name: Start Conduit locally
+        run: |
+          echo "TODO: docker compose up -d conduit"
+          echo "TODO: wait for Conduit health check"
+
+      - name: Seed Conduit test data
+        run: |
+          echo "TODO: run seed script — create test users and articles"
+
+      - name: Health check — Conduit API
+        run: |
+          echo "TODO: curl -f ${CONDUIT_API_URL}/tags"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: cypress/package-lock.json
+
+      - name: Install Cypress dependencies
+        working-directory: cypress
+        run: |
+          echo "TODO: npm ci"
+          echo "TODO: npx cypress install"
+
+      - name: Run Cypress tests
+        working-directory: cypress
+        env:
+          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+        run: |
+          echo "TODO: npm test"
+
+      - name: Generate Allure report
+        if: always()
+        working-directory: cypress
+        run: |
+          echo "TODO: allure generate reports/allure-results -o reports/allure-report"
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-allure-results
+          path: cypress/reports/allure-results/
+          retention-days: 30
+
+      - name: Upload failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: |
+            cypress/screenshots/
+            cypress/videos/
+          retention-days: 7
+
+      - name: Trigger Allure publish
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // TODO: dispatch publish-allure workflow with artifact reference
+            console.log('TODO: trigger publish-allure.yml');

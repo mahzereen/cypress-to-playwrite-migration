@@ -1,0 +1,12 @@
+{
+  "name": "@conduit-migration/cypress",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Cypress E2E framework — baseline for Conduit migration analysis",
+  "scripts": {
+    "test": "cypress run",
+    "test:open": "cypress open",
+    "test:allure": "echo 'TODO: run tests with Allure reporter and generate report'"
+  },
+  "devDependencies": {}
+}
