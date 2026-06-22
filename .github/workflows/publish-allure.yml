@@ -16,8 +16,6 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: publish-allure
@@ -30,13 +28,10 @@ env:
   TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD || 'TestPassword123' }}
 
 jobs:
-  allure-pages:
-    name: Cypress + Playwright → Allure → GitHub Pages
+  build:
+    name: Cypress + Playwright → Allure
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - name: Checkout repository
@@ -129,26 +124,51 @@ jobs:
           retention-days: 30
           if-no-files-found: warn
 
-      - name: Setup GitHub Pages
+      - name: Stop Conduit
         if: always()
+        run: npm run app:down
+
+  deploy:
+    name: Deploy Allure → GitHub Pages
+    needs: build
+    if: always() && needs.build.result != 'cancelled'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+      actions: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Download Allure HTML report
+        uses: actions/download-artifact@v4
+        with:
+          name: combined-allure-report
+          path: migration/allure-report
+
+      - name: Setup GitHub Pages
         uses: actions/configure-pages@v4
 
+      # Re-runs attach extra "github-pages" artifacts to the same run_id;
+      # deploy-pages requires exactly one. See actions/upload-pages-artifact#97.
+      - name: Delete stale github-pages artifacts from prior attempts
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: github-pages
+          failOnError: false
+
       - name: Upload Pages artifact
-        if: always()
         uses: actions/upload-pages-artifact@v3
         with:
           path: migration/allure-report/
 
       - name: Deploy to GitHub Pages
-        if: always()
         id: deployment
         uses: actions/deploy-pages@v4
 
       - name: Report dashboard URL
-        if: always()
-        run: |
-          echo "Allure dashboard: ${{ steps.deployment.outputs.page_url }}"
-
-      - name: Stop Conduit
-        if: always()
-        run: npm run app:down
+        run: echo "Allure dashboard → ${{ steps.deployment.outputs.page_url }}"
