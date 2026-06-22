@@ -1,3 +1,6 @@
+/**
+ * Conduit sign-in page (`/#/login`).
+ */
 import BasePage from './BasePage';
 
 class LoginPage extends BasePage {
@@ -17,6 +20,11 @@ class LoginPage extends BasePage {
     cy.contains('button', 'Login').click();
   }
 
+  /**
+   * Full UI login flow.
+   * @param {string} email
+   * @param {string} password
+   */
   login(email, password) {
     this.fillEmail(email);
     this.fillPassword(password);

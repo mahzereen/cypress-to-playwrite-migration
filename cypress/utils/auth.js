@@ -1,5 +1,14 @@
+/**
+ * Conduit authentication via `cy.session()` and localStorage JWT injection.
+ * Mirrors Conduit frontend: `localStorage.loggedUser` with `Token` header.
+ * @module utils/auth
+ */
 import { getApiUrl } from './config';
 
+/**
+ * @param {{ token: string, [key: string]: unknown }} user - API user payload
+ * @returns {{ headers: { Authorization: string }, isAuth: boolean, loggedUser: object }}
+ */
 function buildLoggedInState(user) {
   return {
     headers: { Authorization: `Token ${user.token}` },
@@ -8,6 +17,11 @@ function buildLoggedInState(user) {
   };
 }
 
+/**
+ * Caches authenticated browser state per email. Setup calls API login once per session key.
+ * @param {{ email: string, password: string, username?: string }} user
+ * @sideeffects Writes `loggedUser` to localStorage; visits `/#/` on cache miss
+ */
 export function loginViaSession(user) {
   const { email, password } = user;
   const apiUrl = getApiUrl();
@@ -43,6 +57,12 @@ export function loginViaSession(user) {
   );
 }
 
+/**
+ * Injects JWT without `cy.session()` — for one-off navigation with a known user payload.
+ * @param {string} path - Hash route (e.g. `/article/my-slug`)
+ * @param {{ token: string, [key: string]: unknown }} user
+ * @sideeffects Sets localStorage and navigates to `/#${path}`
+ */
 export function injectAuthAndVisit(path, user) {
   const loggedIn = buildLoggedInState(user);
   const hashPath = path.startsWith('/') ? path : `/${path}`;

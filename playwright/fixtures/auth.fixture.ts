@@ -1,3 +1,10 @@
+/**
+ * Extended Playwright test with per-test API auth (mirrors Cypress `cy.session()`).
+ *
+ * Clears project `storageState` so each test gets an isolated user from `testUser`.
+ * Register/login specs use the `chromium-unauth` project instead.
+ * @module fixtures/auth.fixture
+ */
 import { test as base, expect, type Page } from '@playwright/test';
 import { buildUser } from './factories/userFactory';
 import { loginUserViaApi, registerUserViaApi } from '../utils/apiClient';
@@ -10,13 +17,14 @@ import type { ConduitUser } from '../utils/apiClient';
 type AuthFixtures = {
   /** Unique user registered via API and authenticated for the current test. */
   testUser: ConduitLoggedUser & ConduitUser;
-  /** Page with per-test auth injected (mirrors Cypress cy.loginViaSession). */
+  /** Page with per-test auth injected (mirrors Cypress `cy.loginViaSession`). */
   authenticatedPage: Page;
   /** API login helper returning the logged-in user payload. */
   apiLogin: (credentials: { email: string; password: string }) => Promise<ConduitLoggedUser>;
 };
 
 export const test = base.extend<AuthFixtures>({
+  /** Override project storageState — each test registers its own user. */
   storageState: async ({}, use) => {
     await use({ cookies: [], origins: [] });
   },

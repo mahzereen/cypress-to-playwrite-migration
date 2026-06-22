@@ -11,7 +11,7 @@ npm run app:up
 # 2. Run 10 Cypress iterations (retries=0) + auto-summarize
 npm run baseline:cypress
 
-# 3. After Playwright P0 is ported
+# 3. Playwright baseline (P0 ported)
 npm run baseline:playwright
 ```
 

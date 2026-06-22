@@ -1,3 +1,6 @@
+/**
+ * Conduit article detail page (`/#/article/:slug`).
+ */
 import { expect, type Locator, type Page } from '@playwright/test';
 import { BasePage } from './BasePage';
 
@@ -30,10 +33,15 @@ export class ArticlePage extends BasePage {
       .click();
   }
 
+  /**
+   * Favorite button(s) scoped to `.article-page`.
+   * Call `assertTitle()` first so the article (and slug) is loaded.
+   */
   favoriteButtons(): Locator {
     return this.page.locator('.article-page').getByRole('button', { name: 'Favorite' });
   }
 
+  /** Clicks the first Favorite control on the detail page. */
   async clickFavorite(): Promise<void> {
     await this.favoriteButtons().first().click();
   }

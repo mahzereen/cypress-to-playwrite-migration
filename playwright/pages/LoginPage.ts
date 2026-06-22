@@ -1,3 +1,6 @@
+/**
+ * Conduit sign-in page (`/#/login`).
+ */
 import { expect, type Page } from '@playwright/test';
 import { BasePage } from './BasePage';
 
@@ -22,6 +25,7 @@ export class LoginPage extends BasePage {
     await this.page.getByRole('button', { name: 'Login' }).click();
   }
 
+  /** Full UI login flow. */
   async login(email: string, password: string): Promise<void> {
     await this.fillEmail(email);
     await this.fillPassword(password);

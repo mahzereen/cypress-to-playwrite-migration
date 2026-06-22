@@ -1,3 +1,6 @@
+/**
+ * Conduit registration page (`/#/register`).
+ */
 import { expect, type Page } from '@playwright/test';
 import { BasePage } from './BasePage';
 
@@ -26,6 +29,7 @@ export class RegisterPage extends BasePage {
     await this.page.getByRole('button', { name: 'Sign up' }).click();
   }
 
+  /** Full UI registration flow. */
   async register(user: { username: string; email: string; password: string }): Promise<void> {
     await this.fillUsername(user.username);
     await this.fillEmail(user.email);

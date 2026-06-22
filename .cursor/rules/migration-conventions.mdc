@@ -9,7 +9,7 @@ alwaysApply: true
 ## Principles
 
 - Cypress is the **baseline**; Playwright is the **target**
-- No real test logic in scaffold phase — placeholders and TODOs only until implementation PRs
+- P0 parity achieved — both suites mirror the same 9 scenarios
 - All decisions documented as ADRs in `migration/adr/`
 - Empirical data (flakiness, duration, cost) drives decommission timing — not opinion
 

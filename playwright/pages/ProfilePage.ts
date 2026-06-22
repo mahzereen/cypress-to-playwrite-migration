@@ -1,3 +1,6 @@
+/**
+ * Conduit user profile page (`/#/profile/:username`).
+ */
 import { expect, type Page } from '@playwright/test';
 import { BasePage } from './BasePage';
 

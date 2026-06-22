@@ -1,6 +1,6 @@
 # Test Strategy — Conduit Migration
 
-> **Status:** Scaffold  
+> **Status:** P0 complete (Cypress + Playwright parity)  
 > **Owner:** QE Architecture  
 > **Last updated:** 2026-06-17
 
@@ -31,7 +31,7 @@ Define how we test the RealWorld (Conduit) application during and after the Cypr
 
 ## P0 Scope (Cypress baseline)
 
-P0 specs must pass against local Conduit before Playwright porting begins. Each spec is **fully isolated** — unique users and data per run via factories; no shared mutable state between specs.
+P0 specs pass against local Conduit in both frameworks. Each spec is **fully isolated** — unique users and data per run via factories; no shared mutable state between specs.
 
 | Area | Scenario | Spec | Auth pattern |
 |------|----------|------|--------------|
@@ -57,11 +57,11 @@ P0 specs must pass against local Conduit before Playwright porting begins. Each 
 
 ## Framework Strategy
 
-| Phase | Cypress | Playwright | Duration |
-|-------|---------|------------|----------|
-| Baseline | Primary — all specs | Scaffold only | Weeks 1–2 |
-| Dual-run | Baseline + comparison | P0 ported | Weeks 3–6 |
-| Target | Decommission | Primary — all specs | Week 7+ |
+| Phase | Cypress | Playwright | Status |
+|-------|---------|------------|--------|
+| Baseline | Primary — P0 specs | — | Complete |
+| Dual-run | Baseline + comparison | P0 ported | **Current** |
+| Target | Decommission | Primary — all specs | Not started |
 
 During dual-run, **both frameworks execute in CI** on every push to `main`. Discrepancies trigger investigation before Cypress decommission.
 
@@ -111,6 +111,8 @@ See [auth-flow-comparison.md](../migration/analysis/auth-flow-comparison.md) for
 
 ## Related Documents
 
+- [Cypress package guide](../cypress/README.md)
+- [Playwright package guide](../playwright/README.md)
 - [Migration Analysis](../migration/analysis/migration-analysis.md)
 - [Test Pyramid](../migration/architecture/test-pyramid.md)
 - [ADR Index](../migration/adr/)

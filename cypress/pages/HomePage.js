@@ -1,3 +1,6 @@
+/**
+ * Conduit home feed (`/#/`).
+ */
 import BasePage from './BasePage';
 
 class HomePage extends BasePage {

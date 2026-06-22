@@ -1,3 +1,9 @@
+#!/usr/bin/env node
+/**
+ * Registers and verifies the seeded test user against Conduit API.
+ * Reads `CONDUIT_API_URL`, `TEST_USER_EMAIL`, `TEST_USER_PASSWORD` from root `.env`.
+ * Idempotent — treats "already exists" as success.
+ */
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';

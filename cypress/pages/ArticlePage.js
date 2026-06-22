@@ -1,6 +1,10 @@
+/**
+ * Conduit article detail page (`/#/article/:slug`).
+ */
 import BasePage from './BasePage';
 
 class ArticlePage extends BasePage {
+  /** @param {string} slug */
   visit(slug) {
     this.visitHash(`/article/${slug}`);
   }
@@ -21,10 +25,16 @@ class ArticlePage extends BasePage {
     cy.contains('button', 'Delete Article').click();
   }
 
+  /**
+   * Favorite button(s) scoped to `.article-page`.
+   * Call `assertTitle()` first so the article (and slug) is loaded.
+   * @returns {Cypress.Chainable<JQuery<HTMLElement>>}
+   */
   favoriteButtons() {
     return cy.get('.article-page').contains('button', 'Favorite');
   }
 
+  /** Clicks the first Favorite control on the detail page. */
   clickFavorite() {
     this.favoriteButtons().first().click();
   }

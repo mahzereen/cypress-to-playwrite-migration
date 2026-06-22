@@ -1,8 +1,14 @@
+/**
+ * Setup project: authenticates the seeded user via API and writes `storageState`.
+ *
+ * Runs once before browser projects (`dependencies: ['setup']` in `playwright.config.ts`).
+ * Output: `playwright/.auth/user.json` (gitignored).
+ */
 import { test as setup, expect } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 import { getSeededUser } from './utils/config';
-import { injectConduitAuth, loginAndAuthenticate } from './utils/auth';
+import { loginAndAuthenticate } from './utils/auth';
 
 const authDir = path.join(__dirname, '.auth');
 const authFile = path.join(authDir, 'user.json');

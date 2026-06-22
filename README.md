@@ -132,16 +132,21 @@ npm run baseline:playwright   # 10 runs, retries=0
 # 1. Environment
 cp .env.example .env
 
-# 2. Start Conduit
+# 2. Start Conduit (from repo root)
 npm run app:up
 npm run app:seed
 
-# 3. Cypress
+# 3. Cypress — see cypress/README.md
 cd cypress && npm install && npm test
 
-# 4. Playwright
+# 4. Playwright — see playwright/README.md
 cd playwright && npm install && npx playwright install chromium && npm test
 ```
+
+| Package | Run guide | Auth model |
+|---------|-----------|------------|
+| Cypress | [cypress/README.md](./cypress/README.md) | `cy.session()` + API login |
+| Playwright | [playwright/README.md](./playwright/README.md) | Setup project + `storageState` + auth fixture |
 
 ## Why This Exists
 

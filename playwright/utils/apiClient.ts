@@ -1,3 +1,7 @@
+/**
+ * Conduit REST API helpers using Playwright `APIRequestContext`.
+ * @module utils/apiClient
+ */
 import type { APIRequestContext, APIResponse } from '@playwright/test';
 import { getApiUrl } from './config';
 
@@ -14,6 +18,12 @@ export type ArticlePayload = {
   tagList: string[];
 };
 
+/**
+ * @param request - Playwright API request context
+ * @param user - Unique credentials from `buildUser()`
+ * @returns API response; body contains `{ user: { token, ... } }`
+ * @throws Error when response is not OK
+ */
 export async function registerUserViaApi(
   request: APIRequestContext,
   user: ConduitUser,
@@ -27,6 +37,12 @@ export async function registerUserViaApi(
   return response;
 }
 
+/**
+ * @param request - Playwright API request context
+ * @param credentials - Email and password
+ * @returns API response; body contains `{ user: { token, ... } }`
+ * @throws Error when response is not OK
+ */
 export async function loginUserViaApi(
   request: APIRequestContext,
   credentials: { email: string; password: string },
@@ -40,6 +56,13 @@ export async function loginUserViaApi(
   return response;
 }
 
+/**
+ * @param request - Playwright API request context
+ * @param token - JWT from registered/logged-in user
+ * @param article - Article payload
+ * @returns API response; body contains `{ article: { slug, ... } }`
+ * @throws Error when response is not OK
+ */
 export async function createArticleViaApi(
   request: APIRequestContext,
   token: string,

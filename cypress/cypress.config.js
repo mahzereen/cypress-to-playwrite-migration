@@ -1,3 +1,9 @@
+/**
+ * Cypress E2E config for Conduit (RealWorld).
+ *
+ * Env: root `.env` → `BASE_URL`, `CONDUIT_API_URL`, `TEST_USER_*` (see `.env.example`).
+ * Allure results: `cypress/reports/allure-results/`.
+ */
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 

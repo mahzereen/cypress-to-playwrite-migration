@@ -1,8 +1,16 @@
+/**
+ * Shared Conduit navigation and navbar auth assertions.
+ * Conduit uses HashRouter — routes are `/#/path`.
+ */
 import { expect, type Page } from '@playwright/test';
 
 export class BasePage {
   constructor(protected readonly page: Page) {}
 
+  /**
+   * @param path - Hash route without `#` prefix (e.g. `/login`)
+   * @sideeffects Navigates browser to `/#${path}`
+   */
   async visitHash(path = '/'): Promise<void> {
     const route = path.startsWith('/') ? path : `/${path}`;
     await this.page.goto(`/#${route}`);
@@ -22,6 +30,7 @@ export class BasePage {
     await this.page.locator('.dropdown-toggle').click();
   }
 
+  /** @sideeffects Opens user menu and clicks Logout */
   async logout(): Promise<void> {
     await this.openUserMenu();
     await this.page.getByRole('link', { name: 'Logout' }).click();

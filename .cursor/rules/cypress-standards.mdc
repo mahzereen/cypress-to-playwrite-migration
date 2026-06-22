@@ -6,19 +6,18 @@ alwaysApply: false
 
 # Cypress Standards
 
-> Placeholder — expand with team conventions before implementing tests.
-
 ## Structure
 
 - Page objects in `cypress/pages/` — specs never contain raw selectors
 - API helpers in `cypress/utils/apiClient.js`
 - Auth via `cypress/utils/auth.js` using `cy.session()` + API login
-- Fixtures in `cypress/fixtures/` — no live credentials or JWTs
+- Factories in `cypress/fixtures/factories/` — no live credentials or JWTs
+- Package overview: `cypress/README.md`
 
 ## Auth
 
-- Prefer API login inside `cy.session()` for speed
-- Use `validate` callback to detect expired sessions
+- Prefer API login inside `cy.session()` for speed (`cy.loginViaSession(user)`)
+- Register/login specs use UI only; all other P0 specs use session + API setup
 - Never commit session cache or tokens
 
 ## Selectors
@@ -28,11 +27,17 @@ alwaysApply: false
 
 ## Reporting
 
-- Allure metadata via `cypress/utils/allure.js`
+- Allure via `@shelex/cypress-allure-plugin` in `cypress.config.js`
 - Results output to `cypress/reports/allure-results/`
 
-## TODO
+## Documentation
 
-- [ ] Define naming conventions for specs (`*.cy.js`)
-- [ ] Define custom command patterns
-- [ ] Define retry and timeout defaults
+- JSDoc on all exports in `utils/`, `fixtures/factories/`, and `support/commands.js`
+- JSDoc class header on each page object; method docs only for composite or non-obvious behavior
+- No JSDoc on spec files — see `.cursor/rules/general.mdc`
+
+## Conventions
+
+- Specs: `tests/**/*.cy.js`
+- Run: `npm test` from `cypress/` (requires Conduit up — see package README)
+- CI: `retries=0` for flakiness measurement (`npx cypress run --config retries=0`)

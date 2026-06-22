@@ -1,3 +1,6 @@
+/**
+ * Conduit registration page (`/#/register`).
+ */
 import BasePage from './BasePage';
 
 class RegisterPage extends BasePage {
@@ -21,6 +24,10 @@ class RegisterPage extends BasePage {
     cy.contains('button', 'Sign up').click();
   }
 
+  /**
+   * Full UI registration flow.
+   * @param {{ username: string, email: string, password: string }} user
+   */
   register({ username, email, password }) {
     this.fillUsername(username);
     this.fillEmail(email);

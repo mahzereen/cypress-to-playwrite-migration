@@ -1,3 +1,6 @@
+/**
+ * Conduit article editor (`/#/editor` and `/#/editor/:slug`).
+ */
 import BasePage from './BasePage';
 
 class EditorPage extends BasePage {
@@ -5,6 +8,7 @@ class EditorPage extends BasePage {
     this.visitHash('/editor');
   }
 
+  /** @param {string} slug - Existing article slug for edit mode */
   visitEdit(slug) {
     this.visitHash(`/editor/${slug}`);
   }
@@ -34,6 +38,10 @@ class EditorPage extends BasePage {
     cy.contains('button', 'Update Article').click();
   }
 
+  /**
+   * Fills all fields and publishes a new article.
+   * @param {{ title: string, description: string, body: string, tagList?: string[] }} article
+   */
   createArticle({ title, description, body, tagList }) {
     this.fillTitle(title);
     this.fillDescription(description);
@@ -42,6 +50,10 @@ class EditorPage extends BasePage {
     this.publish();
   }
 
+  /**
+   * Updates only provided fields, then submits.
+   * @param {{ title?: string, description?: string, body?: string }} fields
+   */
   editArticle({ title, description, body }) {
     if (title) this.fillTitle(title);
     if (description) this.fillDescription(description);

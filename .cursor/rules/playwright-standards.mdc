@@ -6,8 +6,6 @@ alwaysApply: false
 
 # Playwright Standards
 
-> Placeholder — expand with team conventions before implementing tests.
-
 ## Structure
 
 - Page objects in `playwright/pages/` (TypeScript) — specs never contain raw selectors
@@ -15,13 +13,14 @@ alwaysApply: false
 - Reusable auth fixture in `playwright/fixtures/auth.fixture.ts`
 - API helpers in `playwright/utils/apiClient.ts`
 - Generated auth state in `.auth/` — gitignored
+- Package overview: `playwright/README.md`
 
 ## Auth
 
-- Setup project authenticates once via API login
-- Persist `storageState` to `.auth/user.json`
+- Setup project authenticates seeded user via API → `storageState` in `.auth/user.json`
 - Browser projects declare `dependencies: ['setup']`
-- Use `auth.fixture.ts` for per-test authenticated page when needed
+- `auth.fixture.ts` registers unique users per test (mirrors Cypress `cy.session()`)
+- Register/login specs use `chromium-unauth` project (no saved storageState)
 
 ## Selectors
 
@@ -33,8 +32,15 @@ alwaysApply: false
 - Allure via `allure-playwright` reporter in `playwright.config.ts`
 - Results output to `playwright/reports/allure-results/`
 
-## TODO
+## Documentation
 
-- [ ] Define naming conventions for specs (`*.spec.ts`)
-- [ ] Define fixture extension patterns
-- [ ] Define parallel worker and retry defaults
+- TSDoc on all exports in `utils/`, `fixtures/`, and `auth.setup.ts`
+- TSDoc class header on each page object; method docs for composite or non-obvious behavior
+- Document subtle helpers (e.g. React controlled-field input in `EditorPage`)
+- No TSDoc on spec files — see `.cursor/rules/general.mdc`
+
+## Conventions
+
+- Specs: `tests/**/*.spec.ts`
+- Run: `npm test` from `playwright/` (requires Conduit up — see package README)
+- CI: `npx playwright test --retries=0`

@@ -1,3 +1,8 @@
+/**
+ * Conduit authentication via localStorage JWT injection.
+ * Mirrors Conduit frontend: `localStorage.loggedUser` with `Token` header.
+ * @module utils/auth
+ */
 import type { APIRequestContext, Page } from '@playwright/test';
 import { loginUserViaApi, registerUserViaApi, type ConduitUser } from './apiClient';
 import { buildUser } from '../fixtures/factories/userFactory';
@@ -10,6 +15,9 @@ export type ConduitLoggedUser = {
   image?: string | null;
 };
 
+/**
+ * Builds the object Conduit stores in `localStorage.loggedUser`.
+ */
 export function buildLoggedInState(user: ConduitLoggedUser) {
   return {
     headers: { Authorization: `Token ${user.token}` },
@@ -18,6 +26,10 @@ export function buildLoggedInState(user: ConduitLoggedUser) {
   };
 }
 
+/**
+ * Injects auth before navigation so the first page load sees a logged-in user.
+ * @sideeffects Sets `loggedUser` in localStorage via `addInitScript`
+ */
 export async function injectConduitAuth(page: Page, user: ConduitLoggedUser): Promise<void> {
   const loggedIn = buildLoggedInState(user);
   await page.addInitScript((state) => {
@@ -25,6 +37,10 @@ export async function injectConduitAuth(page: Page, user: ConduitLoggedUser): Pr
   }, JSON.stringify(loggedIn));
 }
 
+/**
+ * Registers via API, injects auth, and returns the combined user payload.
+ * Default credentials come from `buildUser()` when `user` is omitted.
+ */
 export async function registerAndAuthenticate(
   page: Page,
   request: APIRequestContext,
@@ -37,6 +53,9 @@ export async function registerAndAuthenticate(
   return { ...user, ...registered };
 }
 
+/**
+ * Logs in via API, injects auth, and returns the logged-in user payload.
+ */
 export async function loginAndAuthenticate(
   page: Page,
   request: APIRequestContext,

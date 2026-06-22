@@ -1,3 +1,10 @@
+/**
+ * Playwright E2E config for Conduit (RealWorld).
+ *
+ * Projects: `setup` (auth.setup.ts) → `chromium-unauth` (register/login) → `chromium` (rest).
+ * Env: root `.env` via `getBaseUrl()`; auth state in `.auth/user.json` (gitignored).
+ * Allure results: `playwright/reports/allure-results/`.
+ */
 import path from 'node:path';
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';

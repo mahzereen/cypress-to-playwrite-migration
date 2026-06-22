@@ -1,3 +1,6 @@
+/**
+ * Conduit article editor (`/#/editor` and `/#/editor/:slug`).
+ */
 import { expect, type Page } from '@playwright/test';
 import { BasePage } from './BasePage';
 
@@ -14,6 +17,10 @@ export class EditorPage extends BasePage {
     await this.visitHash(`/editor/${slug}`);
   }
 
+  /**
+   * Replaces a React controlled field via select-all + type.
+   * `fill()` alone does not sync Conduit editor state reliably.
+   */
   private async fillInputField(locator: ReturnType<Page['locator']>, value: string): Promise<void> {
     await locator.click();
     await locator.press('ControlOrMeta+a');
@@ -41,10 +48,15 @@ export class EditorPage extends BasePage {
     await this.page.getByRole('button', { name: 'Publish Article' }).click();
   }
 
+  /** Waits until the editor has loaded the article title from the API. */
   async waitForArticleLoaded(title: string): Promise<void> {
     await expect(this.page.locator('input[name="title"]')).toHaveValue(title);
   }
 
+  /**
+   * Submits the edit form and waits for the PUT `/api/articles/:slug` response.
+   * @sideeffects Clicks Update Article and blocks until API confirms success
+   */
   async update(): Promise<void> {
     const updateButton = this.page.getByRole('button', { name: 'Update Article' });
     await Promise.all([
@@ -58,6 +70,7 @@ export class EditorPage extends BasePage {
     ]);
   }
 
+  /** Fills all fields and publishes a new article. */
   async createArticle(article: {
     title: string;
     description: string;
@@ -71,6 +84,7 @@ export class EditorPage extends BasePage {
     await this.publish();
   }
 
+  /** Updates only provided fields, asserts each value, then submits. */
   async editArticle(fields: {
     title?: string;
     description?: string;

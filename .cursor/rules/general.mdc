@@ -11,10 +11,86 @@ alwaysApply: true
 - Follow SOLID principles
 - File < 300 lines; class < 200 lines; method < 40 lines
 
-## Documentation
+## Documentation (JSDoc / TSDoc)
 
-- Document public classes and non-trivial methods only; skip self-evident ones
-- When documented, include: **Purpose**, **Params**, **Returns**, **Exceptions**, **Side effects**
+Document **boundaries** — shared code that other modules import. Do not document obvious test steps.
+
+### Document (required)
+
+| Layer | What to document |
+|-------|------------------|
+| `utils/`, `fixtures/`, `support/` | Every **exported** function, type, and fixture field |
+| Page object **classes** | Class purpose (which Conduit screen) |
+| Page object **methods** | Non-obvious or composite actions (see below) |
+| Config / setup files | Module header: env vars, side effects, project wiring |
+| `scripts/` | Module header + exported CLI behavior |
+
+### Skip (do not document)
+
+| Layer | Why |
+|-------|-----|
+| Spec `it()` / `test()` bodies | `describe` + test title is the documentation |
+| Self-evident one-liners | `visit()`, `fillEmail()` when class doc already explains the screen |
+| Inline comments | Only for non-obvious logic, workarounds, or ticket TODOs |
+
+### When you document, include
+
+**Purpose**, **@param** / **@returns**, **@throws** (if applicable), **side effects** (navigation, API, localStorage, files).
+
+### Examples
+
+**Do — exported util (`utils/apiClient.ts`):**
+
+```typescript
+/**
+ * Registers a user via Conduit API.
+ * @param request - Playwright API request context
+ * @param user - Unique credentials from `buildUser()`
+ * @returns API response; body contains `{ user: { token, ... } }`
+ * @throws Error when response is not OK
+ */
+export async function registerUserViaApi(...)
+```
+
+**Do — subtle private helper:**
+
+```typescript
+/**
+ * Replaces a React controlled field via select-all + type.
+ * `fill()` alone does not sync Conduit editor state reliably.
+ */
+private async fillInputField(...)
+```
+
+**Do — composite page object method:**
+
+```javascript
+/**
+ * Favorites the first Favorite control on the article detail page.
+ * Assert title is visible before calling — slug must be loaded.
+ */
+clickFavorite() { ... }
+```
+
+**Don't — spec file:**
+
+```javascript
+// BAD: documents what the test title already says
+it('logs in via the UI', () => {
+  // Step 1: open login page
+  loginPage.visit();
+});
+```
+
+**Don't — redundant method doc:**
+
+```javascript
+// BAD: repeats the method name with no extra contract
+/** Fills the email field. */
+fillEmail(email) { ... }
+```
+
+Package-level **README.md** in `cypress/` and `playwright/` covers how to run, env, and auth model — not duplicated in every subfolder.
 
 ## Comments
 
