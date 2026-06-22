@@ -42,15 +42,19 @@ const config = {
   },
   playwright: {
     cwd: path.join(repoRoot, 'playwright'),
-    buildCommand: (runLabel, runsDirPath) => [
-      'npx',
-      [
-        'playwright',
-        'test',
-        '--retries=0',
-        `--reporter=json,${path.join(runsDirPath, `run-${runLabel}.json`)}`,
-      ],
-    ],
+    buildCommand: (runLabel, runsDirPath) => {
+      const jsonPath = path.join(runsDirPath, `run-${runLabel}.json`);
+      return [
+        'npx',
+        [
+          'playwright',
+          'test',
+          '--retries=0',
+          '--reporter=json',
+        ],
+        { PLAYWRIGHT_JSON_OUTPUT_NAME: jsonPath },
+      ];
+    },
   },
 };
 
@@ -99,12 +103,12 @@ for (let i = 1; i <= runCount; i += 1) {
   const started = Date.now();
   console.log(`\n=== run ${i}/${runCount} ===`);
 
-  const [cmd, args] = buildCommand(runLabel, runsDir);
+  const [cmd, args, extraEnv = {}] = buildCommand(runLabel, runsDir);
   const result = spawnSync(cmd, args, {
     cwd,
     encoding: 'utf8',
     shell: process.platform === 'win32',
-    env: { ...process.env, FORCE_COLOR: '0' },
+    env: { ...process.env, FORCE_COLOR: '0', ...extraEnv },
   });
 
   const durationMs = Date.now() - started;

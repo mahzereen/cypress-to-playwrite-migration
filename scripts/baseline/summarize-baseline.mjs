@@ -31,12 +31,17 @@ function mean(values) {
   return values.reduce((a, b) => a + b, 0) / values.length;
 }
 
-function countLoc(targetDirs) {
+function countLoc(targetDirs, extraFiles = []) {
   let total = 0;
-  const files = [];
+  const files = [...extraFiles];
 
   function walk(dir) {
     if (!fs.existsSync(dir)) return;
+    const stat = fs.statSync(dir);
+    if (stat.isFile()) {
+      if (/\.(js|ts|mjs)$/.test(dir)) files.push(dir);
+      return;
+    }
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
       const full = path.join(dir, entry.name);
       if (entry.isDirectory()) {
@@ -154,6 +159,7 @@ function parsePlaywrightRun(payload) {
       const file = s.file ?? fileHint ?? 'unknown';
       for (const spec of s.specs ?? []) {
         const filePath = spec.file ?? file;
+        if (filePath.includes('auth.setup')) continue;
         for (const test of spec.tests ?? []) {
           const results = test.results ?? [];
           const last = results[results.length - 1];
@@ -239,10 +245,12 @@ const locDirs =
         path.join(repoRoot, 'playwright', 'pages'),
         path.join(repoRoot, 'playwright', 'utils'),
         path.join(repoRoot, 'playwright', 'fixtures'),
-        path.join(repoRoot, 'playwright', 'auth.setup.ts'),
       ];
 
-const loc = countLoc(locDirs);
+const locExtraFiles =
+  framework === 'playwright' ? [path.join(repoRoot, 'playwright', 'auth.setup.ts')] : [];
+
+const loc = countLoc(locDirs, locExtraFiles);
 const runs = loadRuns();
 
 if (runs.length === 0) {

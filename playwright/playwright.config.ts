@@ -1,9 +1,15 @@
-// TODO: Configure Playwright for RealWorld (Conduit) — projects, storageState, Allure.
-// See .cursor/rules/ for coding standards.
-
+import path from 'node:path';
 import { defineConfig, devices } from '@playwright/test';
+import dotenv from 'dotenv';
 
-const baseURL = process.env.CONDUIT_BASE_URL ?? 'http://localhost:3000';
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
+const baseURL =
+  process.env.BASE_URL?.replace(/\/$/, '') ||
+  process.env.CONDUIT_BASE_URL?.replace(/\/$/, '') ||
+  'http://localhost:3000';
+
+const authFile = path.join(__dirname, '.auth/user.json');
 
 export default defineConfig({
   testDir: './tests',
@@ -13,7 +19,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: [
     ['list'],
-    // TODO: ['allure-playwright', { outputFolder: 'reports/allure-results' }],
+    ['allure-playwright', { resultsDir: 'reports/allure-results' }],
   ],
   use: {
     baseURL,
@@ -22,19 +28,26 @@ export default defineConfig({
     video: 'retain-on-failure',
   },
   projects: [
-    // Setup project: authenticate once, persist storageState for reuse
     {
       name: 'setup',
+      testDir: '.',
       testMatch: /auth\.setup\.ts/,
     },
     {
+      name: 'chromium-unauth',
+      testMatch: /auth\/(register|login)\.spec\.ts/,
+      dependencies: ['setup'],
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
       name: 'chromium',
+      testMatch: /.*\.spec\.ts/,
+      testIgnore: [/auth\/(register|login)\.spec\.ts/],
+      dependencies: ['setup'],
       use: {
         ...devices['Desktop Chrome'],
-        storageState: '.auth/user.json',
+        storageState: authFile,
       },
-      dependencies: ['setup'],
     },
-    // TODO: firefox, webkit projects as needed
   ],
 });

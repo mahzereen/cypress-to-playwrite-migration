@@ -7,31 +7,31 @@
 
 | Metric | Cypress | Playwright | Delta (PW − CY) |
 |--------|---------|------------|-----------------|
-| Captured | 2026-06-22 | _pending_ | — |
-| Runs | 10 | _pending_ | — |
+| Captured | 2026-06-22 | 2026-06-22 | — |
+| Runs | 10 | 10 | — |
 | Retries | 0 | 0 | — |
-| Specs per run | 9 | _pending_ | — |
-| LOC (tests+POM+utils) | 553 | _pending_ | — |
-| Green run rate | 100% | _pending_ | — |
-| Test pass rate | 100% | _pending_ | — |
-| Avg duration | 28.7s | _pending_ | — |
-| p50 duration | 27.1s | _pending_ | — |
-| p95 duration | 34.3s | _pending_ | — |
-| Flaky specs | none | _pending_ | — |
+| Specs per run | 9 | 9 | — |
+| LOC (tests+POM+utils) | 553 | 642 | +89.0 |
+| Green run rate | 100% | 100% | 0% |
+| Test pass rate | 100% | 100% | 0% |
+| Avg duration | 28.7s | 7.3s | -21.38s |
+| p50 duration | 27.1s | 7.1s | — |
+| p95 duration | 34.3s | 8.0s | — |
+| Flaky specs | none | none | — |
 
 ## Per-spec pass rate
 
 | Spec | Cypress | Playwright | Flaky (CY) | Flaky (PW) |
 |------|---------|------------|------------|------------|
-| create-article | 100% | _pending_ | no | — |
-| delete-article | 100% | _pending_ | no | — |
-| edit-article | 100% | _pending_ | no | — |
-| favorite-article | 100% | _pending_ | no | — |
-| follow-user | 100% | _pending_ | no | — |
-| login | 100% | _pending_ | no | — |
-| logout | 100% | _pending_ | no | — |
-| register | 100% | _pending_ | no | — |
-| view-article | 100% | _pending_ | no | — |
+| create-article | 100% | 100% | no | no |
+| delete-article | 100% | 100% | no | no |
+| edit-article | 100% | 100% | no | no |
+| favorite-article | 100% | 100% | no | no |
+| follow-user | 100% | 100% | no | no |
+| login | 100% | 100% | no | no |
+| logout | 100% | 100% | no | no |
+| register | 100% | 100% | no | no |
+| view-article | 100% | 100% | no | no |
 
 ## How to refresh
 

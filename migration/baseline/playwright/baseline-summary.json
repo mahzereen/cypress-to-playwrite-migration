@@ -1,0 +1,157 @@
+{
+  "framework": "playwright",
+  "capturedAt": "2026-06-22T12:41:22.259Z",
+  "runs": 10,
+  "retries": 0,
+  "loc": 642,
+  "locFiles": 23,
+  "specs": 9,
+  "suitePassRate": 100,
+  "testPassRate": 100,
+  "greenRuns": 10,
+  "durationMs": {
+    "avg": 7348,
+    "p50": 7058,
+    "p95": 8012,
+    "min": 6938,
+    "max": 8012
+  },
+  "flakySpecs": [],
+  "perRun": [
+    {
+      "run": "01",
+      "status": "PASS",
+      "durationMs": 7576,
+      "passes": 9,
+      "failures": 0
+    },
+    {
+      "run": "02",
+      "status": "PASS",
+      "durationMs": 7499,
+      "passes": 9,
+      "failures": 0
+    },
+    {
+      "run": "03",
+      "status": "PASS",
+      "durationMs": 6991,
+      "passes": 9,
+      "failures": 0
+    },
+    {
+      "run": "04",
+      "status": "PASS",
+      "durationMs": 7017,
+      "passes": 9,
+      "failures": 0
+    },
+    {
+      "run": "05",
+      "status": "PASS",
+      "durationMs": 6938,
+      "passes": 9,
+      "failures": 0
+    },
+    {
+      "run": "06",
+      "status": "PASS",
+      "durationMs": 7812,
+      "passes": 9,
+      "failures": 0
+    },
+    {
+      "run": "07",
+      "status": "PASS",
+      "durationMs": 7058,
+      "passes": 9,
+      "failures": 0
+    },
+    {
+      "run": "08",
+      "status": "PASS",
+      "durationMs": 6977,
+      "passes": 9,
+      "failures": 0
+    },
+    {
+      "run": "09",
+      "status": "PASS",
+      "durationMs": 7598,
+      "passes": 9,
+      "failures": 0
+    },
+    {
+      "run": "10",
+      "status": "PASS",
+      "durationMs": 8012,
+      "passes": 9,
+      "failures": 0
+    }
+  ],
+  "perSpec": {
+    "create-article": {
+      "runs": 10,
+      "passes": 10,
+      "failures": 0,
+      "passRate": 100,
+      "flaky": false
+    },
+    "delete-article": {
+      "runs": 10,
+      "passes": 10,
+      "failures": 0,
+      "passRate": 100,
+      "flaky": false
+    },
+    "edit-article": {
+      "runs": 10,
+      "passes": 10,
+      "failures": 0,
+      "passRate": 100,
+      "flaky": false
+    },
+    "favorite-article": {
+      "runs": 10,
+      "passes": 10,
+      "failures": 0,
+      "passRate": 100,
+      "flaky": false
+    },
+    "follow-user": {
+      "runs": 10,
+      "passes": 10,
+      "failures": 0,
+      "passRate": 100,
+      "flaky": false
+    },
+    "login": {
+      "runs": 10,
+      "passes": 10,
+      "failures": 0,
+      "passRate": 100,
+      "flaky": false
+    },
+    "logout": {
+      "runs": 10,
+      "passes": 10,
+      "failures": 0,
+      "passRate": 100,
+      "flaky": false
+    },
+    "register": {
+      "runs": 10,
+      "passes": 10,
+      "failures": 0,
+      "passRate": 100,
+      "flaky": false
+    },
+    "view-article": {
+      "runs": 10,
+      "passes": 10,
+      "failures": 0,
+      "passRate": 100,
+      "flaky": false
+    }
+  }
+}

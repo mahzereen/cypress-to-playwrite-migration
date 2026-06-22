@@ -1,18 +1,21 @@
-// TODO: Auth setup project — authenticate once, reuse storageState across tests.
-//
-// Flow (placeholder):
-//   1. Call Conduit POST /api/users/login via API fixture
-//   2. Inject JWT into browser localStorage / cookies
-//   3. Save storageState to .auth/user.json (gitignored)
-//
-// See fixtures/auth.fixture.ts and utils/apiClient.ts
+import { test as setup, expect } from '@playwright/test';
+import fs from 'node:fs';
+import path from 'node:path';
+import { getSeededUser } from './utils/config';
+import { injectConduitAuth, loginAndAuthenticate } from './utils/auth';
 
-import { test as setup } from '@playwright/test';
+const authDir = path.join(__dirname, '.auth');
+const authFile = path.join(authDir, 'user.json');
 
-const authFile = '.auth/user.json';
+setup('authenticate via API and persist storageState', async ({ page, request }) => {
+  fs.mkdirSync(authDir, { recursive: true });
 
-setup('authenticate via API and persist storageState', async ({ page }) => {
-  // TODO: Implement API-based login — no real test code in scaffold phase
-  // await loginViaApi(page, { email, password });
-  // await page.context().storageState({ path: authFile });
+  const { email, password } = getSeededUser();
+  const user = await loginAndAuthenticate(page, request, { email, password });
+
+  await page.goto('/#/');
+  await expect(page.getByRole('link', { name: 'New Article' })).toBeVisible();
+  await expect(page.locator('.dropdown-toggle')).toContainText(user.username);
+
+  await page.context().storageState({ path: authFile });
 });
