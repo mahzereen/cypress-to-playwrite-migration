@@ -1,0 +1,34 @@
+name: Setup Conduit
+description: Prepare .env, start local Conduit via Docker, and seed test data
+
+inputs:
+  test_user_email:
+    description: Seeded user email
+    required: false
+    default: test@example.com
+  test_user_password:
+    description: Seeded user password
+    required: false
+    default: TestPassword123
+
+runs:
+  using: composite
+  steps:
+    - name: Prepare environment file
+      shell: bash
+      run: cp .env.example .env
+
+    - name: Start Conduit (Docker Compose)
+      shell: bash
+      run: npm run app:up
+
+    - name: Seed Conduit test data
+      shell: bash
+      env:
+        TEST_USER_EMAIL: ${{ inputs.test_user_email }}
+        TEST_USER_PASSWORD: ${{ inputs.test_user_password }}
+      run: npm run app:seed
+
+    - name: Health check — Conduit API
+      shell: bash
+      run: bash infra/scripts/wait-for-app.sh

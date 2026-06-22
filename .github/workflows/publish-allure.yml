@@ -5,11 +5,13 @@ on:
     branches: [main]
     paths:
       - 'cypress/**'
+      - 'playwright/**'
       - 'infra/**'
-      - 'app-under-test/**'
-      - '.github/workflows/publish-allure.yml'
       - '.env.example'
       - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/publish-allure.yml'
+      - '.github/actions/setup-conduit/**'
   workflow_dispatch:
 
 permissions:
@@ -24,12 +26,14 @@ concurrency:
 env:
   BASE_URL: http://localhost:3000
   CONDUIT_API_URL: http://localhost:3001/api
+  TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL || 'test@example.com' }}
+  TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD || 'TestPassword123' }}
 
 jobs:
-  cypress-allure-pages:
-    name: Cypress → Allure → GitHub Pages
+  allure-pages:
+    name: Cypress + Playwright → Allure → GitHub Pages
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -43,19 +47,16 @@ jobs:
         with:
           node-version: '20'
           cache: npm
-          cache-dependency-path: cypress/package-lock.json
+          cache-dependency-path: |
+            package-lock.json
+            cypress/package-lock.json
+            playwright/package-lock.json
 
-      - name: Prepare environment file
-        run: cp .env.example .env
-
-      - name: Start Conduit locally
-        run: npm run app:up
-
-      - name: Seed Conduit test data
-        env:
-          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL || 'test@example.com' }}
-          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD || 'TestPassword123' }}
-        run: npm run app:seed
+      - name: Start and seed Conduit
+        uses: ./.github/actions/setup-conduit
+        with:
+          test_user_email: ${{ env.TEST_USER_EMAIL }}
+          test_user_password: ${{ env.TEST_USER_PASSWORD }}
 
       - name: Install Cypress dependencies
         working-directory: cypress
@@ -63,14 +64,34 @@ jobs:
           npm ci
           npx cypress install
 
+      - name: Install Playwright dependencies
+        working-directory: playwright
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Clean prior Allure results
+        run: |
+          rm -rf cypress/reports/allure-results playwright/reports/allure-results migration/allure-report
+          mkdir -p cypress/reports/allure-results playwright/reports/allure-results
+
       - name: Run Cypress suite
         working-directory: cypress
         env:
           BASE_URL: ${{ env.BASE_URL }}
           CONDUIT_API_URL: ${{ env.CONDUIT_API_URL }}
-          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL || 'test@example.com' }}
-          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD || 'TestPassword123' }}
-        run: npm test
+          TEST_USER_EMAIL: ${{ env.TEST_USER_EMAIL }}
+          TEST_USER_PASSWORD: ${{ env.TEST_USER_PASSWORD }}
+        run: npx cypress run --config retries=0
+
+      - name: Run Playwright suite
+        working-directory: playwright
+        env:
+          BASE_URL: ${{ env.BASE_URL }}
+          CONDUIT_API_URL: ${{ env.CONDUIT_API_URL }}
+          TEST_USER_EMAIL: ${{ env.TEST_USER_EMAIL }}
+          TEST_USER_PASSWORD: ${{ env.TEST_USER_PASSWORD }}
+        run: npx playwright test --retries=0
 
       - name: Setup Java (Allure requirement)
         if: always()
@@ -79,26 +100,34 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Generate Allure report
+      - name: Generate combined Allure report
         if: always()
-        working-directory: cypress
-        run: npm run report:generate
+        run: |
+          npx --prefix cypress allure generate \
+            cypress/reports/allure-results \
+            playwright/reports/allure-results \
+            --clean \
+            -o migration/allure-report
 
       - name: Upload Allure results artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cypress-allure-results
-          path: cypress/reports/allure-results/
+          name: combined-allure-results
+          path: |
+            cypress/reports/allure-results/
+            playwright/reports/allure-results/
           retention-days: 30
+          if-no-files-found: warn
 
       - name: Upload Allure HTML report artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cypress-allure-report
-          path: cypress/reports/allure-report/
+          name: combined-allure-report
+          path: migration/allure-report/
           retention-days: 30
+          if-no-files-found: warn
 
       - name: Setup GitHub Pages
         if: always()
@@ -108,7 +137,7 @@ jobs:
         if: always()
         uses: actions/upload-pages-artifact@v3
         with:
-          path: cypress/reports/allure-report/
+          path: migration/allure-report/
 
       - name: Deploy to GitHub Pages
         if: always()
@@ -119,3 +148,7 @@ jobs:
         if: always()
         run: |
           echo "Allure dashboard: ${{ steps.deployment.outputs.page_url }}"
+
+      - name: Stop Conduit
+        if: always()
+        run: npm run app:down

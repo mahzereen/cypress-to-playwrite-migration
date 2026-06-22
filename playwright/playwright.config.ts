@@ -1,13 +1,9 @@
 import path from 'node:path';
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
+import { getBaseUrl } from './utils/config';
 
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
-
-const baseURL =
-  process.env.BASE_URL?.replace(/\/$/, '') ||
-  process.env.CONDUIT_BASE_URL?.replace(/\/$/, '') ||
-  'http://localhost:3000';
 
 const authFile = path.join(__dirname, '.auth/user.json');
 
@@ -15,14 +11,14 @@ export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI_RETRIES ? Number.parseInt(process.env.CI_RETRIES, 10) : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: [
     ['list'],
     ['allure-playwright', { resultsDir: 'reports/allure-results' }],
   ],
   use: {
-    baseURL,
+    baseURL: getBaseUrl(),
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

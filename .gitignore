@@ -14,6 +14,7 @@ cypress/downloads/
 
 # Playwright artifacts
 playwright-report/
+playwright/test-results/
 test-results/
 playwright/.auth/
 
@@ -26,6 +27,8 @@ cypress/reports/allure-results/
 cypress/reports/allure-report/
 playwright/reports/allure-results/
 playwright/reports/allure-report/
+migration/allure-report/
+migration/metrics/metrics.json
 
 # Environment & secrets — live JWTs never committed
 .env
