@@ -2,57 +2,72 @@
 
 **Status:** Accepted  
 **Date:** 2026-06-17  
+**Updated:** 2026-06-22 (local baseline measured; CI TODO)  
 **Deciders:** QE Architecture  
 
 ## Context
 
-During the Cypress → Playwright migration, two frameworks run in parallel. Stakeholders need a **single observability surface** to compare pass rates, flakiness, duration trends, and failure categories — without switching between incompatible native reporters.
+During Cypress → Playwright migration, stakeholders need comparable pass rates and duration trends. Local 10-run baseline shows **100% pass** for both frameworks; **CI baseline TODO**.
 
-CI must be deterministic: no dependency on public Conduit demo endpoints, no committed secrets, and artifacts retained for post-mortem analysis.
+Allure is wired locally:
+
+| Framework | Results path | Reporter |
+|-----------|--------------|----------|
+| Cypress | `cypress/reports/allure-results/` | `@shelex/cypress-allure-plugin` |
+| Playwright | `playwright/reports/allure-results/` | `allure-playwright` |
 
 ## Decision
 
-Standardize on the following CI and reporting stack:
+Standardize on this CI and reporting stack:
 
-| Layer | Tool | Purpose |
-|-------|------|---------|
-| CI orchestration | GitHub Actions | Four workflows: Cypress, Playwright, metrics, Allure publish |
-| App under test | Conduit (Docker, local) | Started and seeded in every workflow run |
-| Test reporting | Allure (`allure-playwright`, Cypress Allure plugin) | Unified report format across frameworks |
-| Report hosting | GitHub Pages | Published via `publish-allure.yml` |
-| Failure artifacts | Screenshots, traces, videos | Uploaded as workflow artifacts (short retention) |
-| Metrics aggregation | `migration-metrics.yml` | Cross-framework comparison JSON for trend analysis |
+| Layer | Tool | Status |
+|-------|------|--------|
+| CI orchestration | GitHub Actions | Workflows scaffolded: `cypress-ci.yml`, `playwright-ci.yml`, `migration-metrics.yml`, `publish-allure.yml` |
+| App under test | Conduit (Docker, local) | `npm run app:up` — used for local baseline |
+| Test reporting | Allure | Both frameworks produce `allure-results/` |
+| Report hosting | GitHub Pages | `publish-allure.yml` on push to `main` — **TODO: first deploy URL** |
+| Failure artifacts | Screenshots, traces, video | Playwright: `screenshot`/`video`/`trace` on failure |
+| Metrics aggregation | `migration-metrics.yml` | **TODO: populate from CI runs** |
 
-Observability principles:
+**Local baseline harness** (measured data source):
 
-1. **Every workflow** starts Conduit locally, seeds data, health-checks before tests
-2. **Allure results** uploaded as artifacts on every run — even on failure
-3. **Secrets** (test user credentials) via GitHub Secrets — never in repo
-4. **Auth state files** generated at runtime — gitignored, never uploaded
-5. **Migration metrics** workflow runs on schedule to feed flakiness and cost-benefit reports
+```bash
+npm run baseline:cypress      # 10 runs, retries=0
+npm run baseline:playwright   # 10 runs, retries=0
+```
+
+Outputs: `migration/baseline/{framework}/baseline-summary.json`
+
+**Principles:**
+
+1. Every CI workflow starts Conduit locally, seeds data, health-checks before tests
+2. Allure results uploaded as artifacts on every run — even on failure
+3. Credentials via `.env` (local) / GitHub Secrets (CI) — never committed
+4. Auth state (`.auth/user.json`) generated at runtime — gitignored
+5. `retries=0` for flakiness measurement windows
 
 ## Consequences
 
 ### Positive
 
-- Single dashboard (Allure on GitHub Pages) for both frameworks during migration
-- Historical trends enable data-driven decommission of Cypress
-- Artifact retention supports async debugging without re-running CI
-- Metrics workflow automates flakiness report population
+- Single Allure format enables side-by-side dashboards once Pages deploys
+- Local baseline harness produced auditable JSON for migration docs
+- Measured: both frameworks **10/10 green** locally with `retries=0`
 
 ### Negative
 
-- GitHub Pages adds a deploy step and branch management (`gh-pages`)
-- Allure plugin maintenance for two frameworks during dual-run period
-- Artifact storage costs at scale (mitigated by retention policies)
+- GitHub Pages URL not yet available — **TODO: `https://<org>.github.io/<repo>/`**
+- CI workflows not yet validated end-to-end on `ubuntu-latest`
+- Dual Allure reporter maintenance during transition
 
 ### Neutral
 
-- Native Playwright HTML report and Cypress Dashboard are not used — Allure is canonical
-- Workflow YAML lives in `.github/workflows/` — see [ci-cd-flow.md](../architecture/ci-cd-flow.md)
+- Native Playwright HTML report and Cypress Dashboard not used — Allure is canonical
+- See [ci-cd-flow.md](../architecture/ci-cd-flow.md)
 
 ## References
 
 - [CI/CD Flow](../architecture/ci-cd-flow.md)
 - [Flakiness Report](../analysis/flakiness-reliability-report.md)
-- [ADR-005: Environment — Local vs Hosted Conduit](./005-environment-local-vs-hosted-conduit.md)
+- [ADR-005: Environment](./005-environment-local-vs-hosted-conduit.md)
+- [Comparison Matrix](../baseline/comparison-matrix.md)

@@ -2,13 +2,21 @@
 
 **Status:** Accepted  
 **Date:** 2026-06-17  
+**Updated:** 2026-06-22 (baseline measured on local Docker)  
 **Deciders:** QE Architecture  
 
 ## Context
 
-The RealWorld (Conduit) application can be run locally (Docker), self-hosted, or accessed via public demo instances (e.g., `demo.realworld.io`). Each option has different implications for test determinism, data isolation, CI reproducibility, and flakiness measurement.
+Conduit can run locally (Docker), self-hosted, or via public demos. Flakiness comparison requires a controlled environment.
 
-Public demo endpoints are tempting for quick starts but introduce variables outside our control: shared state, rate limits, deployments, and data mutations by other users.
+**All measured baseline data** (2026-06-22) was captured against **local Docker Conduit**:
+
+| Framework | Green runs | Pass rate | Avg duration |
+|-----------|------------|-----------|--------------|
+| Cypress | 10/10 | 100% | 28.7s |
+| Playwright | 10/10 | 100% | 7.3s |
+
+Source: `migration/baseline/*/baseline-summary.json` — `retries=0`, 9 P0 specs per run.
 
 ## Decision
 
@@ -16,39 +24,43 @@ Public demo endpoints are tempting for quick starts but introduce variables outs
 
 | Environment | Conduit source | Data seeding | Used for |
 |-------------|---------------|--------------|----------|
-| Local dev | Docker Compose (TBD) | Seed script before test run | Authoring & debugging |
-| CI (GitHub Actions) | Docker container in workflow | Seed script in workflow steps | Automated runs, metrics |
+| Local dev | `infra/docker-compose.yml` | `npm run app:seed` | Authoring, baseline runs |
+| CI (GitHub Actions) | Docker in workflow | Seed script in workflow | **TODO: validate** |
 | Public demo | **Not used** | — | — |
 
-Configuration:
+Configuration (from `.env.example`):
 
-- `CONDUIT_BASE_URL` defaults to `http://localhost:3000`
-- `CONDUIT_API_URL` defaults to `http://localhost:3000/api`
-- Credentials supplied via `.env` (local) or GitHub Secrets (CI)
-- Health check (`GET /api/tags` or equivalent) gates test execution
+| Variable | Value |
+|----------|-------|
+| `BASE_URL` | `http://localhost:3000` |
+| `CONDUIT_API_URL` | `http://localhost:3001/api` |
+| `TEST_USER_EMAIL` / `TEST_USER_PASSWORD` | Seeded user credentials |
+
+App repo: cloned to gitignored `app-under-test/` via `npm run app:setup`.
+
+Health gate: `infra/scripts/wait-for-app.sh` before tests.
 
 ## Consequences
 
 ### Positive
 
-- Full control over app state — no cross-contamination from external users
-- Reproducible CI runs enable valid flakiness comparison between frameworks
-- Seed scripts create known test users and articles deterministically
-- No network dependency on third-party demo uptime
+- Reproducible 10-run baselines — **0 flaky specs** for both frameworks
+- No cross-contamination from external demo users
+- Seed script provides deterministic `test` user for Playwright `auth.setup.ts`
 
 ### Negative
 
-- CI workflows include Conduit startup time (~30–60s overhead per run)
-- Docker maintenance burden (image pinning, version updates)
-- Local dev requires Docker installed and running
+- Docker required locally; Conduit startup adds overhead (not isolated in baseline totals)
+- CI startup time on `ubuntu-latest`: **TODO: measure**
+- Docker image/version pinning: **TODO: document pinned SHA in CI runs**
 
 ### Neutral
 
-- Conduit version pinned via Docker image tag or git SHA — document in flakiness report
-- Hosted/staging Conduit may be added later for pre-release validation (out of migration scope)
+- Hosted/staging Conduit out of scope for this migration phase
+- CI replication of local numbers pending
 
 ## References
 
 - [CI/CD Flow](../architecture/ci-cd-flow.md)
 - [Flakiness Report](../analysis/flakiness-reliability-report.md)
-- [RealWorld GitHub](https://github.com/gothinkster/realworld)
+- [TonyMckes/conduit-realworld-example-app](https://github.com/TonyMckes/conduit-realworld-example-app)

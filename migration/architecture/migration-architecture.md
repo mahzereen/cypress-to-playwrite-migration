@@ -58,18 +58,20 @@ graph TB
 
 ## Auth Architecture Comparison
 
+Measured: both frameworks **100% pass rate**, **0 flaky specs** over 10 local runs (9 P0 specs/run).
+
 ```mermaid
 graph LR
     subgraph CypressAuth["Cypress Auth"]
-        CS1["cy.request() login"] --> CS2["cy.session() cache"]
-        CS2 --> CS3["Test specs"]
+        CS1["POST /api/users/login"] --> CS2["cy.session() cache"]
+        CS2 --> CS3["9 P0 specs"]
     end
 
     subgraph PlaywrightAuth["Playwright Auth"]
-        PS1["auth.setup.ts"] --> PS2["API login + JWT inject"]
-        PS2 --> PS3[".auth/user.json"]
-        PS3 --> PS4["storageState in projects"]
-        PS4 --> PS5["Test specs + auth.fixture"]
+        PS1["auth.setup.ts"] --> PS2["storageState → .auth/user.json"]
+        PS2 --> PS3["chromium project"]
+        PS4["auth.fixture API inject"] --> PS3
+        PS3 --> PS5["9 P0 specs"]
     end
 ```
 
@@ -94,14 +96,14 @@ sequenceDiagram
 
 ## Design Principles
 
-| Principle | Rationale |
-|-----------|-----------|
-| Local Conduit only | Eliminates external demo flakiness (ADR-005) |
-| Dual-run during migration | Empirical comparison requires both frameworks live |
-| Auth setup isolated | Fast, deterministic suites (ADR-001) |
-| POM everywhere | Maintainability at scale (ADR-002) |
-| Role-based selectors | Resilience on third-party UI (ADR-003) |
-| Allure as single reporting layer | Comparable dashboards across frameworks (ADR-004) |
+| Principle | Rationale | Measured outcome |
+|-----------|-----------|------------------|
+| Local Conduit only | Eliminates external demo flakiness (ADR-005) | 10/10 green runs both frameworks |
+| Dual-run during migration | Empirical comparison | 9 P0 specs at parity |
+| Auth setup isolated | Fast, deterministic suites (ADR-001) | 0 UI login in authenticated specs |
+| POM everywhere | Maintainability at scale (ADR-002) | 553 → 642 LOC for P0 |
+| Role-first selectors | Resilience on third-party UI (ADR-003) | 0 flaky specs (10 runs) |
+| Allure as single reporting layer | Comparable dashboards (ADR-004) | Both frameworks emit allure-results |
 
 ## Related Documents
 

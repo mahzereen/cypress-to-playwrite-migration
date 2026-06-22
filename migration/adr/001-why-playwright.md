@@ -2,62 +2,68 @@
 
 **Status:** Accepted  
 **Date:** 2026-06-17  
+**Updated:** 2026-06-22 (P0 measured)  
 **Deciders:** QE Architecture  
 
 ## Context
 
-The team maintains a Cypress-based E2E suite against the RealWorld (Conduit) application. As test volume and CI parallelism requirements grow, limitations in Cypress's execution model — particularly around auth reuse across parallel workers and cross-browser coverage — create compounding cost in CI minutes and engineer debug time.
+The team maintains a Cypress-based E2E suite against the RealWorld (Conduit) application. P0 scope (9 specs: auth, article CRUD, favorite, follow) is implemented in both frameworks with local 10-run baselines (`retries=0`).
 
-We need a target framework that:
+Measured local baseline (2026-06-22):
 
-- Scales auth setup efficiently under parallel CI
-- Provides first-class cross-browser support
-- Offers comparable or better debug tooling
-- Integrates with Allure and GitHub Actions
+| Metric | Cypress | Playwright |
+|--------|---------|------------|
+| Avg suite duration | 28.7s | 7.3s |
+| Pass rate (10 runs) | 100% | 100% |
+| Flaky specs | none | none |
+| LOC | 553 | 642 |
+
+Source: `migration/baseline/cypress/baseline-summary.json`, `migration/baseline/playwright/baseline-summary.json`.
+
+Cypress limitations under parallel CI and cross-browser coverage motivated evaluating Playwright as the target framework.
 
 ## Decision
 
-Adopt **Playwright** as the target E2E framework and migrate the Conduit test suite from Cypress over a phased timeline (see [migration-analysis.md](../analysis/migration-analysis.md)).
+Adopt **Playwright** as the target E2E framework. Cypress remains the baseline during dual-run until P1 parity and CI evidence support decommission.
 
-**Auth reuse is a deciding factor.** Playwright's setup-project pattern with `storageState` allows authentication to run once per CI job, persist browser state to a file, and inject it into all parallel workers via project `dependencies`. This is structurally cleaner than per-spec `cy.session()` caching and scales linearly with worker count.
+**Auth reuse is a deciding factor.** Playwright's setup-project pattern with `storageState` (`auth.setup.ts` → `.auth/user.json`) plus `auth.fixture.ts` for per-test API login mirrors Cypress `cy.session()` without UI login repetition. See [auth-flow-comparison.md](../analysis/auth-flow-comparison.md).
 
 Additional factors:
 
 | Factor | Playwright advantage |
 |--------|---------------------|
-| Parallel execution | Native multi-worker, multi-browser |
-| Auth reuse | `storageState` + setup project + reusable auth fixture |
+| Parallel execution | Native multi-worker — measured 7.3s avg vs 28.7s Cypress (local 10-run) |
+| Auth reuse | `storageState` + setup project + auth fixture |
 | Debugging | Trace viewer with network, DOM snapshots, screenshots |
 | API testing | Built-in `request` fixture alongside browser tests |
-| Auto-wait | Locator-based, reduces explicit wait boilerplate |
+| Auto-wait | Locator-based assertions |
 | OSS governance | Microsoft-backed, Apache 2.0 |
-
-Cypress remains as the **baseline** during migration to enable empirical comparison (flakiness, duration, auth timing).
 
 ## Consequences
 
 ### Positive
 
-- Reduced auth overhead in CI as worker count increases
-- Single config surface for cross-browser projects
-- Trace viewer reduces mean-time-to-diagnose for flaky failures
-- Strong hiring pipeline — Playwright adoption accelerating industry-wide
+- Measured **74.4% reduction** in average local suite duration (28.7s → 7.3s) for identical P0 scope
+- **100% pass rate**, **0 flaky specs** over 10 local runs post-port
+- Setup project decouples authentication from individual tests
+- Trace viewer available for failure diagnosis (not yet quantified)
 
 ### Negative
 
-- One-time migration cost for existing Cypress specs and custom commands
-- Dual-framework maintenance during transition period (weeks to months)
-- Team ramp-up on Playwright fixtures, setup projects, and locator API
-- Allure integration requires separate reporter setup vs Cypress plugin ecosystem
+- **+89 LOC** (+16.1%) to achieve P0 parity vs Cypress
+- Dual-framework maintenance during transition (Cypress CI workflows still TODO for full green)
+- Team ramp-up on setup projects, fixtures, and locator API
+- Auth timing not separately measured — overhead claims require TODO instrumentation
 
 ### Neutral
 
-- POM pattern transfers directly — page objects rewritten, not rethought
+- POM pattern transfers directly — page objects rewritten in TypeScript, same surfaces
 - Conduit remains app under test; no application changes required
-- CI infrastructure (GitHub Actions, Docker Conduit) unchanged
+- Local Docker Conduit unchanged (ADR-005)
 
 ## References
 
 - [Auth Flow Comparison](../analysis/auth-flow-comparison.md)
 - [Cost-Benefit Analysis](../analysis/cost-benefit-analysis.md)
+- [Comparison Matrix](../baseline/comparison-matrix.md)
 - [Playwright Auth Setup](https://playwright.dev/docs/auth)

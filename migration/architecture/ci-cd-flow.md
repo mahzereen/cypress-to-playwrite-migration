@@ -106,13 +106,21 @@ flowchart LR
 
 ## Artifact Matrix
 
-| Artifact | Source workflow | Retention | Purpose |
-|----------|----------------|-----------|---------|
-| `cypress-allure-results` | cypress-ci.yml | 30 days | Allure raw results |
-| `playwright-allure-results` | playwright-ci.yml | 30 days | Allure raw results |
-| `cypress-screenshots` | cypress-ci.yml | 7 days | Failure debugging |
-| `playwright-traces` | playwright-ci.yml | 7 days | Failure debugging |
-| `migration-metrics` | migration-metrics.yml | 90 days | Trend analysis |
+| Artifact | Source workflow | Retention | Status |
+|----------|----------------|-----------|--------|
+| `cypress-allure-results` | cypress-ci.yml | 30 days | TODO: CI validate |
+| `playwright-allure-results` | playwright-ci.yml | 30 days | TODO: CI validate |
+| `migration-metrics` | migration-metrics.yml | 90 days | TODO |
+| Local baseline JSON | `npm run baseline:*` | Committed summaries | ✅ 2026-06-22 |
+
+## Measured Local Baseline (reference)
+
+| Framework | Avg duration | Pass rate (10 runs) | Flaky specs |
+|-----------|--------------|---------------------|-------------|
+| Cypress | 28.7s | 100% | none |
+| Playwright | 7.3s | 100% | none |
+
+Source: `migration/baseline/comparison-matrix.md`
 
 ## Environment Variables (CI)
 

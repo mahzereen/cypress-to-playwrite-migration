@@ -1,92 +1,112 @@
 # Test Pyramid — Conduit Migration
 
-> Mermaid diagrams — no PNG assets.
+> Mermaid diagrams — no PNG assets.  
+> **P0 measured:** 9 E2E UI specs, 100% pass rate (10 local runs each framework).
 
-## Target Pyramid
-
-For the RealWorld (Conduit) migration, we optimize for **confidence per minute of CI time**. The pyramid below reflects the intended steady-state distribution after migration completes.
+## Current State (P0 — measured)
 
 ```mermaid
 graph TB
-    subgraph Pyramid["Test Pyramid — Conduit"]
+    subgraph MeasuredP0["P0 Suite — Implemented"]
         direction TB
-        E2E["E2E UI Tests<br/>~30%<br/>Critical user journeys"]
-        INT["Integration / API Tests<br/>~40%<br/>Auth, CRUD, contracts"]
-        UNIT["Unit Tests<br/>~30%<br/>Utils, helpers, fixtures"]
+        E2E["E2E UI Tests<br/>9 specs<br/>100% pass rate (10 runs)"]
+        API["Dedicated API spec files<br/>0<br/>TODO: P1"]
+        UNIT["Unit tests<br/>0<br/>TODO: future"]
     end
 
-    E2E --- INT
-    INT --- UNIT
+    E2E --- API
+    API --- UNIT
 
     style E2E fill:#e74c3c,color:#fff
-    style INT fill:#f39c12,color:#fff
-    style UNIT fill:#27ae60,color:#fff
+    style API fill:#95a5a6,color:#fff
+    style UNIT fill:#95a5a6,color:#fff
+```
+
+## Target Pyramid (steady state — percentages TODO)
+
+```mermaid
+graph TB
+    subgraph Pyramid["Test Pyramid — Target"]
+        direction TB
+        E2E_T["E2E UI Tests<br/>TODO: %<br/>Critical user journeys"]
+        INT_T["Integration / API Tests<br/>TODO: %<br/>Auth, CRUD, contracts"]
+        UNIT_T["Unit Tests<br/>TODO: %<br/>Utils, helpers, fixtures"]
+    end
+
+    E2E_T --- INT_T
+    INT_T --- UNIT_T
+
+    style E2E_T fill:#e74c3c,color:#fff
+    style INT_T fill:#f39c12,color:#fff
+    style UNIT_T fill:#27ae60,color:#fff
 ```
 
 ## Layer Definitions
 
-| Layer | Scope | Framework | Examples (Conduit) |
-|-------|-------|-----------|-------------------|
-| E2E UI | Full browser, real app | Playwright (target) | Login → create article → verify in feed |
-| Integration / API | HTTP against Conduit API | Playwright `request` / Cypress `cy.request()` | POST login, GET/POST articles, follow user |
-| Unit | Pure functions, no browser | Vitest/Jest (future) | Slug generator, API response parsers, fixture builders |
+| Layer | Scope | Framework | P0 status |
+|-------|-------|-----------|-----------|
+| E2E UI | Full browser, real app | Cypress + Playwright | **9 specs — both 100% pass (10 runs)** |
+| Integration / API | HTTP against Conduit API | `apiClient` helpers in specs | Used in setup, not standalone spec files |
+| Unit | Pure functions | TODO: Vitest/Jest | `userFactory`, `articleFactory` only |
 
-## Current vs Target Distribution
-
-| Layer | Cypress (current) | Playwright (target) | Notes |
-|-------|-------------------|---------------------|-------|
-| E2E UI | _TBD %_ | _TBD %_ | Port existing UI specs |
-| API / Integration | _TBD %_ | _TBD %_ | Expand API coverage during migration |
-| Unit | 0% | _TBD %_ | Add for shared utils |
-
-## Conduit Journey Mapping
+## P0 Journey Map (implemented)
 
 ```mermaid
 graph LR
-    subgraph P0["P0 — Must have"]
-        L1["Login / Register"]
-        A1["Create Article"]
-        A2["Read Article"]
+    subgraph Auth["Auth"]
+        R[register]
+        L[login]
+        O[logout]
     end
 
-    subgraph P1["P1 — Should have"]
-        F1["Global Feed"]
-        F2["Filter by Tag"]
-        P1P["User Profile"]
+    subgraph Articles["Articles"]
+        C[create]
+        V[view]
+        E[edit]
+        D[delete]
     end
 
-    subgraph P2["P2 — Nice to have"]
-        C1["Comments"]
-        FL1["Follow User"]
-        S1["Settings"]
+    subgraph Social["Social"]
+        FAV[favorite-article]
+        FOL[follow-user]
     end
 
-    P0 --> P1 --> P2
+    Auth --> Articles --> Social
 ```
+
+| Spec | Cypress pass (10 runs) | Playwright pass (10 runs) | Flaky |
+|------|------------------------|---------------------------|-------|
+| register | 100% | 100% | no |
+| login | 100% | 100% | no |
+| logout | 100% | 100% | no |
+| create-article | 100% | 100% | no |
+| view-article | 100% | 100% | no |
+| edit-article | 100% | 100% | no |
+| delete-article | 100% | 100% | no |
+| favorite-article | 100% | 100% | no |
+| follow-user | 100% | 100% | no |
 
 ## Test Type Selection Guide
 
-| Scenario | Recommended layer | Rationale |
-|----------|-------------------|-----------|
-| JWT acquisition | API | Fast, no browser overhead |
-| Form validation messages | E2E UI | Requires DOM rendering |
-| Article CRUD contract | API | Validates backend directly |
-| Navigation / routing | E2E UI | Browser history, URL assertions |
-| Pagination logic | API + E2E | API for data, E2E for UI rendering |
-| Auth session reuse | Setup project / cy.session | Not a test — infrastructure |
+| Scenario | Layer used in P0 | Framework mechanism |
+|----------|------------------|---------------------|
+| JWT acquisition | API helper | `apiClient` + `cy.session()` / `injectConduitAuth` |
+| Register / login UI | E2E UI | RegisterPage, LoginPage |
+| Article CRUD journey | E2E UI + API setup | API create + UI assert |
+| Auth session reuse | Infrastructure | `cy.session()` / `storageState` + fixture |
+| Favorite / follow | E2E UI + API setup | Two users via API |
 
-## Anti-patterns to Avoid
+## Anti-patterns avoided in P0
 
-| Anti-pattern | Why | Alternative |
-|--------------|-----|-------------|
-| E2E for every API endpoint | Slow, brittle | API integration tests |
-| UI login in every spec | Wastes CI time | storageState / cy.session() |
-| CSS class selectors on Conduit | Third-party DOM changes | getByRole, getByLabel |
-| Testing Conduit internals | We don't control the app | Test observable behavior only |
+| Anti-pattern | Status |
+|--------------|--------|
+| UI login in every authenticated spec | Avoided — session/storageState/fixture |
+| `waitForTimeout` / fixed sleeps | **0 occurrences** in `playwright/` |
+| Hardcoded credentials/URLs | Env-based config (`.env`) |
+| Public demo dependency | Local Docker only (ADR-005) |
 
 ## Related Documents
 
 - [Test Strategy](../../docs/test-strategy.md)
+- [Comparison Matrix](../baseline/comparison-matrix.md)
 - [ADR-002: Why POM](../adr/002-why-pom.md)
-- [ADR-003: Selector Strategy](../adr/003-selector-strategy.md)
-- [Migration Analysis](../analysis/migration-analysis.md)
