@@ -55,3 +55,6 @@ tmp/
 # Coverage
 coverage/
 .nyc_output/
+
+# Baseline run artifacts (summaries are committed)
+migration/baseline/*/runs/

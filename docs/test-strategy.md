@@ -29,13 +29,31 @@ Define how we test the RealWorld (Conduit) application during and after the Cypr
 | Auth setup overhead | < 5% of suite time | Auth flow comparison |
 | Migration parity | 100% P0, 100% P1 | Migration inventory |
 
+## P0 Scope (Cypress baseline)
+
+P0 specs must pass against local Conduit before Playwright porting begins. Each spec is **fully isolated** — unique users and data per run via factories; no shared mutable state between specs.
+
+| Area | Scenario | Spec | Auth pattern |
+|------|----------|------|--------------|
+| **Auth** | Register a new account | `cypress/tests/ui/auth/register.cy.js` | UI only |
+| **Auth** | Login with valid credentials | `cypress/tests/ui/auth/login.cy.js` | UI only (user pre-created via API) |
+| **Auth** | Logout | `cypress/tests/ui/auth/logout.cy.js` | `cy.session()` setup, UI logout |
+| **Articles** | Create and publish | `cypress/tests/ui/articles/create-article.cy.js` | `cy.session()` |
+| **Articles** | View article detail | `cypress/tests/ui/articles/view-article.cy.js` | `cy.session()` + API article |
+| **Articles** | Edit article | `cypress/tests/ui/articles/edit-article.cy.js` | `cy.session()` + API article |
+| **Articles** | Delete article | `cypress/tests/ui/articles/delete-article.cy.js` | `cy.session()` + API article |
+| **Social** | Favorite an article | `cypress/tests/ui/social/favorite-article.cy.js` | `cy.session()` + API setup (author + reader) |
+| **Social** | Follow a user | `cypress/tests/ui/social/follow-user.cy.js` | `cy.session()` + API setup (two users) |
+
+**Auth reuse:** All specs except register and login use `cy.session()` with API `POST /api/users/login` and JWT injection into `localStorage` — see `cypress/utils/auth.js`.
+
 ## Test Prioritization
 
 | Priority | Journeys | Rationale |
 |----------|----------|-----------|
-| **P0** | Login, create article, read article, API auth | Core user value — blocks release signal |
-| **P1** | Global feed, tag filter, profile, API CRUD | High-traffic paths |
-| **P2** | Comments, follow user, settings | Lower risk — post-migration |
+| **P0** | Auth (register, login, logout), article CRUD, favorite, follow | Core user value — blocks release signal |
+| **P1** | Global feed filters, tag filter, settings | High-traffic paths |
+| **P2** | Comments, pagination edge cases | Lower risk — post-migration |
 
 ## Framework Strategy
 

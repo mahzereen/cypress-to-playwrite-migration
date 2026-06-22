@@ -1,0 +1,25 @@
+import BasePage from './BasePage';
+
+class ProfilePage extends BasePage {
+  visit(username) {
+    this.visitHash(`/profile/${username}`);
+  }
+
+  assertUsername(username) {
+    cy.get('.profile-page h4').should('have.text', username);
+  }
+
+  clickFollow(username) {
+    cy.contains('button', new RegExp(`Follow\\s+${username}`)).click();
+  }
+
+  assertFollowing(username) {
+    cy.contains('button', new RegExp(`Unfollow\\s+${username}`)).should('be.visible');
+  }
+
+  assertNotFollowing(username) {
+    cy.contains('button', new RegExp(`Follow\\s+${username}`)).should('be.visible');
+  }
+}
+
+export default ProfilePage;

@@ -8,6 +8,10 @@
     "app:up": "npm run app:setup && docker compose -f infra/docker-compose.yml up -d --build && bash infra/scripts/wait-for-app.sh",
     "app:down": "docker compose -f infra/docker-compose.yml down",
     "app:seed": "bash infra/scripts/wait-for-app.sh && node infra/scripts/seed-user.mjs",
-    "app:urls": "echo 'Frontend (UI):  http://localhost:3000' && echo 'Backend (API):  http://localhost:3001/api' && echo 'Postgres:       localhost:5432 (user/db: conduit)'"
+    "app:urls": "echo 'Frontend (UI):  http://localhost:3000' && echo 'Backend (API):  http://localhost:3001/api' && echo 'Postgres:       localhost:5432 (user/db: conduit)'",
+    "baseline:cypress": "node scripts/baseline/run-baseline.mjs cypress 10",
+    "baseline:playwright": "node scripts/baseline/run-baseline.mjs playwright 10",
+    "baseline:report:cypress": "node scripts/baseline/summarize-baseline.mjs cypress",
+    "baseline:report:playwright": "node scripts/baseline/summarize-baseline.mjs playwright"
   }
 }
