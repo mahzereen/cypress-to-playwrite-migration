@@ -17,9 +17,11 @@ playwright-report/
 test-results/
 playwright/.auth/
 
-# Allure
+# Allure (root + framework reports)
 allure-results/
 allure-report/
+cypress/allure-results/
+cypress/allure-report/
 cypress/reports/allure-results/
 cypress/reports/allure-report/
 playwright/reports/allure-results/

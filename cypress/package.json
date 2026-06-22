@@ -6,10 +6,13 @@
   "scripts": {
     "test": "cypress run",
     "test:open": "cypress open",
-    "test:allure": "echo 'TODO: run tests with Allure reporter and generate report'"
+    "report:generate": "bash scripts/allure-report.sh generate",
+    "report:open": "bash scripts/allure-report.sh open",
+    "test:allure": "npm test && npm run report:generate"
   },
   "devDependencies": {
     "@shelex/cypress-allure-plugin": "^2.41.2",
+    "allure-commandline": "^2.43.0",
     "cypress": "^14.5.4",
     "dotenv": "^17.4.2"
   }

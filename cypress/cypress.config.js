@@ -1,6 +1,8 @@
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
+const allureWriter = require('@shelex/cypress-allure-plugin/writer');
+
 /** @type {import('cypress').CypressConfig} */
 module.exports = {
   e2e: {
@@ -11,6 +13,7 @@ module.exports = {
     viewportHeight: 720,
     retries: { runMode: 1, openMode: 0 },
     setupNodeEvents(on, config) {
+      allureWriter(on, config);
       return config;
     },
   },
@@ -18,5 +21,7 @@ module.exports = {
     apiUrl: process.env.CONDUIT_API_URL || 'http://localhost:3001/api',
     testUserEmail: process.env.TEST_USER_EMAIL,
     testUserPassword: process.env.TEST_USER_PASSWORD,
+    allure: true,
+    allureResultsPath: 'reports/allure-results',
   },
 };
