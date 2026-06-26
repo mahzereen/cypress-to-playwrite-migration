@@ -63,3 +63,6 @@ coverage/
 
 # Baseline run artifacts (summaries are committed)
 migration/baseline/*/runs/
+
+# Mentorship notes — local study material only (not published with the repo)
+docs/mentorship/
